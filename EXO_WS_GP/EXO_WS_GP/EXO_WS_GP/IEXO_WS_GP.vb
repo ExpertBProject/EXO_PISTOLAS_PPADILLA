@@ -262,6 +262,8 @@ Public Class PedidosCompra
     Public UdmArticulo As List(Of UdmArticulo)
     <DataMember()>
     Public SCOF As String
+    <DataMember()>
+    Public EAN As String
 End Class
 
 <DataContract()>

@@ -20,7 +20,7 @@ Public Class Service1
         'Dim log As EXO_Log.EXO_Log
 
         'Dim conexionesB1 As Collections.Hashtable
-
+        'algo
         log = New EXO_Log.EXO_Log(System.Configuration.ConfigurationManager.AppSettings("rutaLog"), 10)
         'conexiones = New EXO_Conexiones
 
@@ -596,7 +596,7 @@ Public Class Service1
             Dim query As String = " SELECT * FROM ( SELECT T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",max(T1.""OpenQty"")- sum(COALESCE(T3.""U_EXO_CANT"",0)) as ""OpenQty"",  " +
                                 " Case WHEN COALESCE(T2.""ManBtchNum"",'N') = 'N' THEN 'N' ELSE 'Y' END as ""EsLote"", " +
                                 " T2.""BHeight1"" As ""Alto"", T2.""BWidth1"" As ""Ancho"",T2.""BLength1"" As ""Largo"",T2.""BWeight1"" As ""Peso"",T1.""unitMsr"",t1.""UomCode"" ""UDM_PEDIDO"",T5.""UomCode"" ""UDM_INV"" " +
-                                " , COALESCE(T4.""BcdCode"",'') as ""Ean14"" " +
+                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"" " +
                                 " FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 ON T0.""DocEntry""=T1.""DocEntry"" " +
                                 " INNER Join ""OITM"" T2 ON T1.""ItemCode""=T2.""ItemCode"" " +
                                 " LEFT JOIN ""@EXO_GP_PEDCOM"" T3 ON T1.""DocEntry""=T3.""U_EXO_DOCE"" and T1.""LineNum""=T3.""U_EXO_LINENUM"" " +
@@ -619,11 +619,11 @@ Public Class Service1
             End If
 
             If CodEan <> "" Then
-                query = query + " and ((T2.""CodeBars"" = '" + CodEanConversion + "' AND T2.""UgpEntry""='-1') OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') "
+                query = query + " and ((T2.""CodeBars"" = '" + CodEanConversion + "' ) OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') "
             End If
 
             query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
-                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"" " +
+                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"" " +
                      " ORDER BY T0.""DocEntry"", T1.""LineNum"" " +
                     " ) as A0 " +
                     " WHERE A0.""OpenQty"" > 0 "
@@ -655,6 +655,7 @@ Public Class Service1
                     oPed.Ancho = rs.Fields.Item("Ancho").Value.ToString
                     oPed.UnidadMedida = rs.Fields.Item("UDM_INV").Value.ToString 'ES LA DE INVENTARIO
                     oPed.UdmLinea = rs.Fields.Item("UDM_PEDIDO").Value.ToString
+                    oPed.EAN = rs.Fields.Item("EAN").Value.ToString
 
                     query2 = "SELECT T0.""U_PP_SCOF"" ""Coeficiente"" FROM OITM T0 WHERE T0.""ItemCode""='" & rs.Fields.Item("ItemCode").Value.ToString & "' AND T0.""U_PP_SCOF""='Y'
                         UNION ALL
@@ -1417,7 +1418,7 @@ Public Class Service1
             Dim query As String = " SELECT * FROM ( SELECT T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",max(T1.""OpenQty"")- sum(COALESCE(T3.""U_EXO_CANT"",0)) as ""OpenQty"",  " +
                                 " Case WHEN COALESCE(T2.""ManBtchNum"",'N') = 'N' THEN 'N' ELSE 'Y' END as ""EsLote"", " +
                                 " T2.""BHeight1"" As ""Alto"", T2.""BWidth1"" As ""Ancho"",T2.""BLength1"" As ""Largo"",T2.""BWeight1"" As ""Peso"",T1.""unitMsr"",t1.""UomCode"" ""UDM_PEDIDO"",T5.""UomCode"" ""UDM_INV"" " +
-                                " , COALESCE(T4.""BcdCode"",'') as ""Ean14"" " +
+                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"" " +
                                 " FROM ""OWTQ"" T0 INNER JOIN ""WTQ1"" T1 ON T0.""DocEntry""=T1.""DocEntry"" " +
                                 " INNER Join ""OITM"" T2 ON T1.""ItemCode""=T2.""ItemCode"" " +
                                 " LEFT JOIN ""@EXO_GP_TRACOM"" T3 ON T1.""DocEntry""=T3.""U_EXO_DOCE"" and T1.""LineNum""=T3.""U_EXO_LINENUM"" " +
@@ -1429,7 +1430,7 @@ Public Class Service1
 
 
             query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
-                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"" " +
+                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"" " +
                      " ORDER BY T0.""DocEntry"", T1.""LineNum"" " +
                     " ) as A0 " +
                     " WHERE A0.""OpenQty"" > 0 "
@@ -1461,7 +1462,7 @@ Public Class Service1
                     oPed.Ancho = rs.Fields.Item("Ancho").Value.ToString
                     oPed.UnidadMedida = rs.Fields.Item("UDM_INV").Value.ToString 'ES LA DE INVENTARIO
                     oPed.UdmLinea = rs.Fields.Item("UDM_PEDIDO").Value.ToString
-
+                    oPed.EAN = rs.Fields.Item("EAN").Value.ToString
                     query2 = "SELECT T0.""U_PP_SCOF"" ""Coeficiente"" FROM OITM T0 WHERE T0.""ItemCode""='" & rs.Fields.Item("ItemCode").Value.ToString & "' AND T0.""U_PP_SCOF""='Y'
                         UNION ALL
                       SELECT T1.""U_PP_SCOF"" ""Coeficiente"" FROM OITM T0 INNER JOIN ""@PP_SOITB"" T1 ON T0.""U_PP_SOITB"" = T1.""DocEntry"" 
@@ -1556,7 +1557,7 @@ Public Class Service1
                 'COMPRUEBO PEDIDOS
                 If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
                     'comprobar que no hay mas pedidos o mas lineas abiertas
-                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
+                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OWTQ"" T0 INNER JOIN ""WTQ"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
                             "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
 
                     rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
@@ -1575,6 +1576,22 @@ Public Class Service1
                         End If
                     End If
                 End If
+
+                'ToDo -> TENDRÍA QUE RECIBIR EL NUMERO DE SOLICITUD DE TRASLADO PARA COMPROBAR QUE EXISTE LA UBICACION EN EL ALMACEN ORIGEN
+                'ToDo -> O TENDRÍA QUE ASIGNARLE YO LA UBICACION ORIGEN EN CASO DE QUE FUERA UNICA.
+
+                ''COMPRUEBO QUE EL LOTE EXISTA EN LA UBICACIÓN QUE RECIBIMOS
+                'query = query = "Select t5.""ItemCode"", t5.""ItemName"", T5.""CodeBars"" " +
+                '            " from """ + BaseDatos + """.""OIBQ"" T0 " +
+                '            " INNER JOIN """ + BaseDatos + """.""OBIN"" T2 ON T2.""AbsEntry"" = T0.""BinAbs"" " +
+                '            " INNER JOIN """ + BaseDatos + """.""OITM"" T5 ON T5.""ItemCode""=T0.""ItemCode"" " +
+                '            " WHERE t2.""BinCode""='" + ListOp.Ubicacion + "' " +
+                '   " and  UPPER(t5.""ItemCode"" = '" + ListOp.Codigo + "' " +
+                '  " GROUP BY t5.""ItemCode"",t5.""ItemName"",T5.""CodeBars"" "
+
+
+
+                'FIN COMPROBACION
 
                 'INSERTO TABLA TEMPORAL
                 query = "SELECT MAX(""Code"")+1 AS ""Code"" FROM ""@EXO_GP_TRACOM"" "
@@ -2111,9 +2128,9 @@ Public Class Service1
             query = " Select T2.""ItemCode"", '0' as ""Cantidad"" " +
                               " FROM  ""OITM"" T2 " +
                               " LEFT JOIN ""OBCD"" T4 ON T2.""SUoMEntry""=T4.""UomEntry"" AND T2.""ItemCode""=T4.""ItemCode"" " +
-                              " WHERE  ((T2.""CodeBars"" = '" + CodEanConversion + "' AND T2.""UgpEntry""='-1') OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') and T2.""ItemCode""='" + CodArticulo + "'"
+                              " WHERE  ((T2.""CodeBars"" = '" + CodEanConversion + "') OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') and T2.""ItemCode""='" + CodArticulo + "'"
 
-
+            ' AND T2.""UgpEntry""='-1'
             rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
             rs.DoQuery(query)
@@ -5028,7 +5045,7 @@ Public Class Service1
         Dim listArt As List(Of ArticulosQR) = New List(Of ArticulosQR)
         Dim oCompany As SAPbobsCOM.Company
         oCompany = New SAPbobsCOM.Company
-
+        log.escribeMensaje("qr: " + Lectura)
 
         Dim rs As SAPbobsCOM.Recordset = Nothing
         Try
@@ -5334,7 +5351,6 @@ Public Class Service1
     End Function
 
 #End Region
-
 
 #Region "No usar"
 
@@ -6156,6 +6172,7 @@ Public Class Service1
     'End Function
 
     '''''FUTURAS MEJORAS, YA DESARROLLADAS CUANDO FUE MADRIFERR
+
 #Region "Reubicaciones de material, solicitudes de traslado, se iba almacennado en la web, hasta finalizar"
 
     Private Function ListasSolicitudTraslado(BaseDatos As String, Usuario As String, Password As String, log As EXO_Log.EXO_Log) As String

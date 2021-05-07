@@ -24,7 +24,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.CompruebaArticulo_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "M2Z010E", "")
+        respuestas = cliente.CompruebaArticulo_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "M2Z010E070", "")
         MessageBox.Show(respuestas)
 
     End Sub
@@ -34,7 +34,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.CompruebaUbicacion_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "350,PL", "M2Z010E070M68")
+        respuestas = cliente.CompruebaUbicacion_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "350,PL", "")
         MessageBox.Show(respuestas)
 
     End Sub
@@ -313,7 +313,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.DesglosePickingTraslado("PD_PPADILLA", "mperiz", "M@rt1nN1c0", 4)
+        respuestas = cliente.DesglosePickingTraslado("PD_PPADILLA", "mperiz", "M@rt1nN1c0", 13)
         MessageBox.Show(respuestas)
     End Sub
 
@@ -370,7 +370,7 @@ Public Class Form1
 
 
 
-        oPicking.NumeroTraslado = 11
+        oPicking.NumeroTraslado = 13
         oPicking.Ubicacion = "350,03,00,00,12"
         oPicking.Resultado = ""
 
@@ -399,7 +399,7 @@ Public Class Form1
         oPalet = New WS_GP.PaletsPicking
         oPalet.Tipo = "europalet"
         oPalet.Palet = 1
-        oPalet.Peso = 100
+        oPalet.Peso = 20
         oPalet.Volumen = 0.96
         oPalet.Altura = 1
         oPalets.Add(oPalet)
@@ -437,7 +437,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.ListadoImprimir("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "24", "20")
+        respuestas = cliente.ListadoImprimir("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "64", "20")
         MessageBox.Show(respuestas)
 
     End Sub
@@ -463,7 +463,7 @@ Public Class Form1
         oLinea.CodArticulo = "MHB0RCZZZZZZZ"
         oLinea.SysNumber = "238"
         oLinea.Ubicacion = "350,PL"
-        oLinea.Impresora = ""
+        oLinea.Impresora = "Microsoft Print to PDF"
         oLineas.Add(oLinea)
 
         oLinea = New WS_GP.LotesImprimir
@@ -472,7 +472,7 @@ Public Class Form1
         oLinea.CodArticulo = "MHB0RCZZZZZZZ"
         oLinea.SysNumber = "238"
         oLinea.Ubicacion = "350,PL"
-        oLinea.Impresora = ""
+        oLinea.Impresora = "Microsoft Print to PDF"
         oLineas.Add(oLinea)
 
 
@@ -488,6 +488,11 @@ Public Class Form1
         Dim JSON As String = sr.ReadToEnd()
 
         'Dim path As String = "E:\Desarrollo\Usuarios\mperiz\picking.txt"
+
+        'If File.Exists(path) Then
+        '    Dim algo As String = ""
+        'End If
+
         'Dim readText As String = File.ReadAllText(path)
         'JSON = readText
 
@@ -745,17 +750,18 @@ Public Class Form1
     '    MessageBox.Show(respuestas)
     'End Sub
 
-    'Private Sub Button19_Click(sender As Object, e As EventArgs) Handles Button19.Click
+    Private Sub Button19_Click(sender As Object, e As EventArgs) Handles Button19.Click
 
 
 
-    '    Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
-    '    Dim respuestas As String = ""
+        Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
+        Dim respuestas As String = ""
 
-    '    respuestas = cliente.ComprobarExisteArticulo("ALEX_BANKINTER", "mperiz", "M@rt1nN1c0", "0118426017016879102427")
-    '    'respuestas = cliente.ComPruebaArticulo("ALEX_BANKINTER", "mperiz", "M@rt1nN1c0", "110001180200001", "]C1011843504310096410123", "Y")
-    '    MessageBox.Show(respuestas)
-    'End Sub
+        'respuestas = cliente.ComprobarExisteArticulo("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "2000004665241")
+        respuestas = cliente.ComPruebaArticulo("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "MHB0RCZZZZZZZ", "2000004665241", "Y")
+        MessageBox.Show(respuestas)
+
+    End Sub
 
     'Private Sub Button20_Click(sender As Object, e As EventArgs) Handles Button20.Click
 

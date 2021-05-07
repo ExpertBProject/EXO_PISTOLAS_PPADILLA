@@ -39,6 +39,11 @@ Public Class Inicio
 
             Try
 
+                contenidoXML = objGlobal.funciones.leerEmbebido(Me.GetType(), "UTs_EXO_GP_TRACOM.xml")
+                objGlobal.refDi.comunes.LoadBDFromXML(contenidoXML)
+                objGlobal.SBOApp.StatusBar.SetText("Validado UTs_EXO_GP_PEDCOM.xml", SAPbouiCOM.BoMessageTime.bmt_Medium, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
+
+
                 contenidoXML = objGlobal.funciones.leerEmbebido(Me.GetType(), "UTs_EXO_GP_PEDCOM.xml")
                 objGlobal.refDi.comunes.LoadBDFromXML(contenidoXML)
                 objGlobal.SBOApp.StatusBar.SetText("Validado UTs_EXO_GP_PEDCOM.xml", SAPbouiCOM.BoMessageTime.bmt_Medium, SAPbouiCOM.BoStatusBarMessageType.smt_Success)
