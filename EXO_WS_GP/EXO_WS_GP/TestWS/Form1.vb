@@ -24,7 +24,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.CompruebaArticulo_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "M2Z010E070", "")
+        respuestas = cliente.CompruebaArticulo_busqueda("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "M2Z", "")
         MessageBox.Show(respuestas)
 
     End Sub
@@ -96,7 +96,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "", "", "", "")
+        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "ESPA", "", "", "")
         MessageBox.Show(respuestas)
     End Sub
 
@@ -152,7 +152,9 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.PedidoCompraGenerar("PD_PPADILLA", "mperiz", "M@rt1nN1c0")
+        respuestas = cliente.PedioCompraResumenFinalizar("PD_PPADILLA", "mperiz", "M@rt1nN1c0")
+
+        'respuestas = cliente.PedidoCompraGenerar("PD_PPADILLA", "mperiz", "M@rt1nN1c0")
         MessageBox.Show(respuestas)
     End Sub
 
@@ -760,6 +762,10 @@ Public Class Form1
         'respuestas = cliente.ComprobarExisteArticulo("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "2000004665241")
         respuestas = cliente.ComPruebaArticulo("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "MHB0RCZZZZZZZ", "2000004665241", "Y")
         MessageBox.Show(respuestas)
+
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
 
     End Sub
 

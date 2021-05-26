@@ -239,6 +239,8 @@ Public Class PedidosCompra
     <DataMember()>
     Public ProveedorNombre As String
     <DataMember()>
+    Public ProveedorAlias As String
+    <DataMember()>
     Public Codigo As String
     <DataMember()>
     Public Descripcion As String
@@ -264,6 +266,8 @@ Public Class PedidosCompra
     Public SCOF As String
     <DataMember()>
     Public EAN As String
+    <DataMember()>
+    Public ReferenciaPedido As String
 End Class
 
 <DataContract()>
@@ -346,6 +350,12 @@ Public Class PedidoCompraResumenFinalizar
     <DataMember()>
     Public UnidadMedida As String
 
+    <DataMember()>
+    Public QDES As Double
+    <DataMember()>
+    Public UOMO As String
+    <DataMember()>
+    Public UOMD As String
 End Class
 
 <DataContract()>

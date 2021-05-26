@@ -593,21 +593,22 @@ Public Class Service1
             End If
 
             'CONSULTA EN HANA
-            Dim query As String = " SELECT * FROM ( SELECT T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",max(T1.""OpenQty"")- sum(COALESCE(T3.""U_EXO_CANT"",0)) as ""OpenQty"",  " +
+            Dim query As String = " SELECT * FROM ( SELECT T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T6.""CardFName"",T1.""ItemCode"",T2.""ItemName"",max(T1.""OpenQty"")- sum(COALESCE(T3.""U_EXO_CANT"",0)) as ""OpenQty"",  " +
                                 " Case WHEN COALESCE(T2.""ManBtchNum"",'N') = 'N' THEN 'N' ELSE 'Y' END as ""EsLote"", " +
                                 " T2.""BHeight1"" As ""Alto"", T2.""BWidth1"" As ""Ancho"",T2.""BLength1"" As ""Largo"",T2.""BWeight1"" As ""Peso"",T1.""unitMsr"",t1.""UomCode"" ""UDM_PEDIDO"",T5.""UomCode"" ""UDM_INV"" " +
-                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"" " +
+                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"",T0.""NumAtCard"" " +
                                 " FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 ON T0.""DocEntry""=T1.""DocEntry"" " +
                                 " INNER Join ""OITM"" T2 ON T1.""ItemCode""=T2.""ItemCode"" " +
                                 " LEFT JOIN ""@EXO_GP_PEDCOM"" T3 ON T1.""DocEntry""=T3.""U_EXO_DOCE"" and T1.""LineNum""=T3.""U_EXO_LINENUM"" " +
                                 " LEFT JOIN ""OBCD"" T4 ON T2.""PUoMEntry""=T4.""UomEntry"" AND T2.""ItemCode""=T4.""ItemCode"" " +
                                 " inner join ""OUOM"" T5 ON T2.""IUoMEntry""=T5.""UomEntry""  " +
+                                " inner join ""OCRD"" T6 ON T0.""CardCode""=T6.""CardCode"" " +
                                 " WHERE 1 = 1 "
 
             'MANU -> FALTA LEFT JOIN A LA OSPP Y SPP1 PARA EL EAN14
 
             If NomProv <> "" Then
-                query = query + " and UPPER(T0.""CardCode"") like '%" + NomProv.ToUpper() + "%' "
+                query = query + " and ( UPPER(T0.""CardCode"") like '%" + NomProv.ToUpper() + "%' or UPPER(T0.""CardName"") like '%" + NomProv.ToUpper() + "%' or UPPER(T6.""CardFName"") like '%" + NomProv.ToUpper() + "%') "
             End If
 
             If NumContenedor <> "" Then
@@ -622,8 +623,8 @@ Public Class Service1
                 query = query + " and ((T2.""CodeBars"" = '" + CodEanConversion + "' ) OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') "
             End If
 
-            query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
-                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"" " +
+            query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T6.""CardFName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
+                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"",T0.""NumAtCard"" " +
                      " ORDER BY T0.""DocEntry"", T1.""LineNum"" " +
                     " ) as A0 " +
                     " WHERE A0.""OpenQty"" > 0 "
@@ -645,6 +646,7 @@ Public Class Service1
                     oPed.NumLinea = rs.Fields.Item("LineNum").Value.ToString
                     oPed.Proveedor = rs.Fields.Item("CardCode").Value.ToString
                     oPed.ProveedorNombre = rs.Fields.Item("CardName").Value.ToString
+                    oPed.ProveedorAlias = rs.Fields.Item("CardFName").Value.ToString
                     oPed.Codigo = rs.Fields.Item("ItemCode").Value.ToString
                     oPed.Descripcion = rs.Fields.Item("ItemName").Value.ToString
                     oPed.Cantidad = rs.Fields.Item("OpenQty").Value.ToString
@@ -656,6 +658,7 @@ Public Class Service1
                     oPed.UnidadMedida = rs.Fields.Item("UDM_INV").Value.ToString 'ES LA DE INVENTARIO
                     oPed.UdmLinea = rs.Fields.Item("UDM_PEDIDO").Value.ToString
                     oPed.EAN = rs.Fields.Item("EAN").Value.ToString
+                    oPed.ReferenciaPedido = rs.Fields.Item("NumAtCard").Value.ToString
 
                     query2 = "SELECT T0.""U_PP_SCOF"" ""Coeficiente"" FROM OITM T0 WHERE T0.""ItemCode""='" & rs.Fields.Item("ItemCode").Value.ToString & "' AND T0.""U_PP_SCOF""='Y'
                         UNION ALL
@@ -854,12 +857,13 @@ Public Class Service1
 
             'hacer consulta al sql y y rellenar el listado
 
-            Dim query As String = " SELECT SUM(T0.""U_EXO_CANT"") as ""U_EXO_CANT"", COALESCE(T0.""U_EXO_LOTE"",'') AS ""U_EXO_LOTE"",T0.""U_EXO_UBICA"",T1.""CardName"",T4.""ItemCode"",T4.""ItemName"",T3.""UomCode"" " +
+            Dim query As String = " SELECT SUM(T0.""U_EXO_CANT"") as ""U_EXO_CANT"", COALESCE(T0.""U_EXO_LOTE"",'') AS ""U_EXO_LOTE"",T0.""U_EXO_UBICA"",T1.""CardName"",T4.""ItemCode"",T4.""ItemName"",T3.""UomCode"", " +
+                "  T0.""U_EXO_CANT"", T0.""U_PP_UOMO"",t0.""U_PP_QDES"",T0.""U_PP_UOMD""" +
                          " FROM ""@EXO_GP_PEDCOM"" T0 INNER JOIN ""OPOR"" T1 On T0.""U_EXO_DOCE""=T1.""DocEntry""  " +
                          " INNER Join ""POR1"" T3 On T0.""U_EXO_DOCE""=T3.""DocEntry"" And T0.""U_EXO_LINENUM""=T3.""LineNum""  " +
                          " INNER Join ""OITM"" T4 ON T3.""ItemCode""=T4.""ItemCode""  " +
                          " WHERE ""U_EXO_USUARIO"" ='" + Usuario + "'  " +
-                         " Group by  T0.""U_EXO_CANT"", T0.""U_EXO_LOTE"", T0.""U_EXO_UBICA"", T1.""CardName"", T4.""ItemCode"", T4.""ItemName"", T3.""UomCode"" "
+                         " Group by  T0.""U_EXO_CANT"", T0.""U_EXO_LOTE"", T0.""U_EXO_UBICA"", T1.""CardName"", T4.""ItemCode"", T4.""ItemName"", T3.""UomCode"",T0.""U_EXO_CANT"", T0.""U_PP_UOMO"",t0.""U_PP_QDES"",T0.""U_PP_UOMD"" "
 
 
 
@@ -885,6 +889,9 @@ Public Class Service1
                     oPed.Ubicacion = rs.Fields.Item("U_EXO_UBICA").Value.ToString
                     oPed.UnidadMedida = rs.Fields.Item("UomCode").Value.ToString
 
+                    oPed.QDES = CType(rs.Fields.Item("U_PP_QDES").Value.ToString, Double)
+                    oPed.UOMO = rs.Fields.Item("U_PP_UOMO").Value.ToString
+                    oPed.UOMD = rs.Fields.Item("U_PP_UOMD").Value.ToString
                     listado.Add(oPed)
 
                     rs.MoveNext()
@@ -5204,7 +5211,7 @@ Public Class Service1
             End If
 
         Catch ex As Exception
-            olist.Resultado = "Error: no se pudo convertir el QR."
+            olist.Resultado = "Error: " + ex.Message
         Finally
             EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rs, Object))
         End Try
