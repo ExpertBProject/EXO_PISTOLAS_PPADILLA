@@ -366,6 +366,9 @@ Namespace WS_GP
         Private AlmacenField As String
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
+        Private CCField As String
+        
+        <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private CantidadField As String
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
@@ -373,6 +376,9 @@ Namespace WS_GP
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private LoteField As String
+        
+        <System.Runtime.Serialization.OptionalFieldAttribute()>  _
+        Private MotivoField As String
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private NumeroPickingField As String
@@ -405,6 +411,19 @@ Namespace WS_GP
                 If (Object.ReferenceEquals(Me.AlmacenField, value) <> true) Then
                     Me.AlmacenField = value
                     Me.RaisePropertyChanged("Almacen")
+                End If
+            End Set
+        End Property
+        
+        <System.Runtime.Serialization.DataMemberAttribute()>  _
+        Public Property CC() As String
+            Get
+                Return Me.CCField
+            End Get
+            Set
+                If (Object.ReferenceEquals(Me.CCField, value) <> true) Then
+                    Me.CCField = value
+                    Me.RaisePropertyChanged("CC")
                 End If
             End Set
         End Property
@@ -444,6 +463,19 @@ Namespace WS_GP
                 If (Object.ReferenceEquals(Me.LoteField, value) <> true) Then
                     Me.LoteField = value
                     Me.RaisePropertyChanged("Lote")
+                End If
+            End Set
+        End Property
+        
+        <System.Runtime.Serialization.DataMemberAttribute()>  _
+        Public Property Motivo() As String
+            Get
+                Return Me.MotivoField
+            End Get
+            Set
+                If (Object.ReferenceEquals(Me.MotivoField, value) <> true) Then
+                    Me.MotivoField = value
+                    Me.RaisePropertyChanged("Motivo")
                 End If
             End Set
         End Property
@@ -966,7 +998,13 @@ Namespace WS_GP
         Private extensionDataField As System.Runtime.Serialization.ExtensionDataObject
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
+        Private CCField As String
+        
+        <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private LineasField() As WS_GP.Articulo
+        
+        <System.Runtime.Serialization.OptionalFieldAttribute()>  _
+        Private MotivoField As String
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private ResultadoField As String
@@ -982,6 +1020,19 @@ Namespace WS_GP
         End Property
         
         <System.Runtime.Serialization.DataMemberAttribute()>  _
+        Public Property CC() As String
+            Get
+                Return Me.CCField
+            End Get
+            Set
+                If (Object.ReferenceEquals(Me.CCField, value) <> true) Then
+                    Me.CCField = value
+                    Me.RaisePropertyChanged("CC")
+                End If
+            End Set
+        End Property
+        
+        <System.Runtime.Serialization.DataMemberAttribute()>  _
         Public Property Lineas() As WS_GP.Articulo()
             Get
                 Return Me.LineasField
@@ -990,6 +1041,19 @@ Namespace WS_GP
                 If (Object.ReferenceEquals(Me.LineasField, value) <> true) Then
                     Me.LineasField = value
                     Me.RaisePropertyChanged("Lineas")
+                End If
+            End Set
+        End Property
+        
+        <System.Runtime.Serialization.DataMemberAttribute()>  _
+        Public Property Motivo() As String
+            Get
+                Return Me.MotivoField
+            End Get
+            Set
+                If (Object.ReferenceEquals(Me.MotivoField, value) <> true) Then
+                    Me.MotivoField = value
+                    Me.RaisePropertyChanged("Motivo")
                 End If
             End Set
         End Property
@@ -1057,6 +1121,9 @@ Namespace WS_GP
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private PesoField As Double
+        
+        <System.Runtime.Serialization.OptionalFieldAttribute()>  _
+        Private PrecioProductoField As Double
         
         <System.Runtime.Serialization.OptionalFieldAttribute()>  _
         Private ResultadoField As String
@@ -1203,6 +1270,19 @@ Namespace WS_GP
                 If (Me.PesoField.Equals(value) <> true) Then
                     Me.PesoField = value
                     Me.RaisePropertyChanged("Peso")
+                End If
+            End Set
+        End Property
+        
+        <System.Runtime.Serialization.DataMemberAttribute()>  _
+        Public Property PrecioProducto() As Double
+            Get
+                Return Me.PrecioProductoField
+            End Get
+            Set
+                If (Me.PrecioProductoField.Equals(value) <> true) Then
+                    Me.PrecioProductoField = value
+                    Me.RaisePropertyChanged("PrecioProducto")
                 End If
             End Set
         End Property

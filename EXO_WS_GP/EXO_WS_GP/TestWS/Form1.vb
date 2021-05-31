@@ -73,7 +73,7 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.LoginUsuario("PD_PPADILLA", "mperiz", "M@rt1nN1c0")
+        respuestas = cliente.LoginUsuario("PD_PPADILLA", "mperiz", "M@rt1nN1c01")
         MessageBox.Show(respuestas)
 
     End Sub
@@ -96,7 +96,8 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "ESPA", "", "", "")
+        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "", "", "21000016", "")
+        'respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "ESPA", "", "", "")
         MessageBox.Show(respuestas)
     End Sub
 
@@ -341,6 +342,7 @@ Public Class Form1
         oTraslado.UbicacionDestino = "350,03,00,00,12"
         oTraslado.NumeroPicking = 11
         oTraslado.PickingLinea = 0
+        oTraslado.Motivo = "67"
 
         Dim str As New MemoryStream()
         Dim js As New System.Runtime.Serialization.Json.DataContractJsonSerializer(oTraslado.GetType)
@@ -455,32 +457,18 @@ Public Class Form1
         Dim oLinea As WS_GP.LotesImprimir = New WS_GP.LotesImprimir
         Dim oLineas As List(Of WS_GP.LotesImprimir) = New List(Of WS_GP.LotesImprimir)
 
-
-
         oPicking.Resultado = ""
 
         oLinea = New WS_GP.LotesImprimir
-        oLinea.TipoEtiqueta=0
-        oLinea.Lote = "21000009-001-001-350-P002681-210324"
-        oLinea.CodArticulo = "MHB0RCZZZZZZZ"
-        oLinea.SysNumber = "238"
-        oLinea.Ubicacion = "350,PL"
-        oLinea.Impresora = "Microsoft Print to PDF"
-        oLineas.Add(oLinea)
-
-        oLinea = New WS_GP.LotesImprimir
         oLinea.TipoEtiqueta = 0
-        oLinea.Lote = "21000009-001-001-350-P002681-210324"
+        oLinea.Lote = "21000015-001-007-01-A000005-210527"
         oLinea.CodArticulo = "MHB0RCZZZZZZZ"
-        oLinea.SysNumber = "238"
+        oLinea.SysNumber = "477"
         oLinea.Ubicacion = "350,PL"
-        oLinea.Impresora = "Microsoft Print to PDF"
+        oLinea.Impresora = "HP LaserJet 1020 (redirected 23)"
         oLineas.Add(oLinea)
-
 
         oPicking.LotesImprimir = oLineas.ToArray
-
-
 
         Dim str As New MemoryStream()
         Dim js As New System.Runtime.Serialization.Json.DataContractJsonSerializer(oPicking.GetType)
@@ -608,48 +596,41 @@ Public Class Form1
     '    MessageBox.Show(respuestas)
     'End Sub
 
-    'Private Sub Button14_Click(sender As Object, e As EventArgs) Handles Button14.Click
-    '    Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
-    '    Dim respuestas As String = ""
-    '    Dim oDoc As WS_GP.OperacionEntradaSalida = New WS_GP.OperacionEntradaSalida
+    Private Sub Button14_Click(sender As Object, e As EventArgs) Handles Button14.Click
+        Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
+        Dim respuestas As String = ""
+        Dim oDoc As WS_GP.OperacionEntradaSalida = New WS_GP.OperacionEntradaSalida
 
-    '    Dim oLinea As WS_GP.Articulo = New WS_GP.Articulo
-    '    Dim oLineas As List(Of WS_GP.Articulo) = New List(Of WS_GP.Articulo)
+        Dim oLinea As WS_GP.Articulo = New WS_GP.Articulo
+        Dim oLineas As List(Of WS_GP.Articulo) = New List(Of WS_GP.Articulo)
 
-    '    oLinea = New WS_GP.Articulo
-    '    oLinea.ArticuloMember = "111001089900007"
-    '    oLinea.Cantidad = 500
-    '    oLinea.Lote = "19122017004"
-    '    oLinea.Ubicacion = "01LANDEA010C"
+        oLinea = New WS_GP.Articulo
+        oLinea.ArticuloMember = "M2Z010E070M68"
+        oLinea.Cantidad = 100
+        oLinea.Lote = "19122017004"
+        oLinea.Ubicacion = "350,PL"
+        oLinea.PrecioProducto = 20
 
-    '    oLineas.Add(oLinea)
+        oDoc.Motivo = "60"
+        oDoc.CC = "11300002"
 
-    '    oLinea = New WS_GP.Articulo
-    '    oLinea.ArticuloMember = "111001089900007"
-    '    oLinea.Cantidad = 1
-    '    oLinea.Lote = "11122017_1"
-    '    oLinea.Ubicacion = "01LANDEA010C"
-    '    oLineas.Add(oLinea)
 
-    '    oLinea = New WS_GP.Articulo
-    '    oLinea.ArticuloMember = "111001089900007"
-    '    oLinea.Cantidad = 1
-    '    oLinea.Lote = "11122017_2"
-    '    oLinea.Ubicacion = "01LANDEA010C"
-    '    oLineas.Add(oLinea)
 
-    '    oDoc.Lineas = oLineas.ToArray
+        oLineas.Add(oLinea)
 
-    '    Dim str As New MemoryStream()
-    '    Dim js As New System.Runtime.Serialization.Json.DataContractJsonSerializer(oDoc.GetType)
-    '    js.WriteObject(str, oDoc)
-    '    str.Position = 0
-    '    Dim sr As New StreamReader(str)
-    '    Dim JSON As String = sr.ReadToEnd()
 
-    '    respuestas = cliente.GenerarDocumentoEntradaManual(JSON, "ALEX_BANKINTER", "mperiz", "M@rt1nN1c0")
-    '    MessageBox.Show(respuestas)
-    'End Sub
+        oDoc.Lineas = oLineas.ToArray
+
+        Dim str As New MemoryStream()
+        Dim js As New System.Runtime.Serialization.Json.DataContractJsonSerializer(oDoc.GetType)
+        js.WriteObject(str, oDoc)
+        str.Position = 0
+        Dim sr As New StreamReader(str)
+        Dim JSON As String = sr.ReadToEnd()
+
+        respuestas = cliente.GenerarDocumentoEntradaManual(JSON, "PD_PPADILLA", "mperiz", "M@rt1nN1c0")
+        MessageBox.Show(respuestas)
+    End Sub
 
     'Private Sub Button15_Click(sender As Object, e As EventArgs) Handles Button15.Click
     '    Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
@@ -768,6 +749,21 @@ Public Class Form1
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
 
     End Sub
+
+    Private Sub Button23_Click(sender As Object, e As EventArgs) Handles Button23.Click
+
+        Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
+        Dim respuestas As String = ""
+
+        'respuestas = cliente.ComprobarExisteArticulo("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "2000004665241")
+        respuestas = cliente.BasesDeDatos()
+        MessageBox.Show(respuestas)
+
+    End Sub
+
+
+
+
 
     'Private Sub Button20_Click(sender As Object, e As EventArgs) Handles Button20.Click
 

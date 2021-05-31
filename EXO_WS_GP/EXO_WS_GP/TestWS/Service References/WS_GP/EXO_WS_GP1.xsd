@@ -27,9 +27,11 @@
   <xs:complexType name="Traslado">
     <xs:sequence>
       <xs:element minOccurs="0" name="Almacen" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CC" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Cantidad" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="CodigoArticulo" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Lote" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Motivo" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="NumeroPicking" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PickingLinea" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="UbicacionDestino" nillable="true" type="xs:string" />
@@ -97,7 +99,9 @@
   <xs:element name="PaletsPicking" nillable="true" type="tns:PaletsPicking" />
   <xs:complexType name="OperacionEntradaSalida">
     <xs:sequence>
+      <xs:element minOccurs="0" name="CC" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Lineas" nillable="true" type="tns:ArrayOfArticulo" />
+      <xs:element minOccurs="0" name="Motivo" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Resultado" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
@@ -120,6 +124,7 @@
       <xs:element minOccurs="0" name="Largo" type="xs:double" />
       <xs:element minOccurs="0" name="Lote" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Peso" type="xs:double" />
+      <xs:element minOccurs="0" name="PrecioProducto" type="xs:double" />
       <xs:element minOccurs="0" name="Resultado" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Ubicacion" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="UnidadMedida" nillable="true" type="xs:string" />

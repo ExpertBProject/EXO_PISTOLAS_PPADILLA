@@ -306,9 +306,13 @@ Public Class Service1
             If conexionesB1.Contains(ValorUsuarioBase) Then
                 oComp = CType(conexionesB1(ValorUsuarioBase), SAPbobsCOM.Company)
                 Try
-                    'If oComp.compañia.InTransaction Then
-                    '    oComp.compañia.EndTransaction(SAPbobsCOM.BoWfTransOpt.wf_RollBack)
-                    'End If
+                    If oComp.Password = Password Then
+
+                    Else
+                        log.escribeMensaje("error conectando " + Usuario + ": contraseña incorrecta")
+                        conexionesB1.Remove(ValorUsuarioBase)
+                        oComp.Disconnect()
+                    End If
                 Catch ex As Exception
 
                     conexionesB1.Remove(ValorUsuarioBase)
@@ -336,7 +340,7 @@ Public Class Service1
                 'oComp.DbUserName = usuarioHANA
                 'oComp.DbPassword = pwdHANA
 
-                log.escribeMensaje("datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA)
+                ' log.escribeMensaje("datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA)
 
                 If oComp.Connect() <> 0 Then
                     Dim algo As String = oComp.GetLastErrorDescription()
@@ -363,66 +367,90 @@ Public Class Service1
 
     Public Function LoginUsuario(BaseDatos As String, Usuario As String, Password As String, log As EXO_Log.EXO_Log) As String
 
-        Dim jRes As Resultado = New Resultado
+        Dim jRes As Login = New Login
         Dim res As String = ""
-        'Dim oCompany As SAPbobsCOM.Company
 
-        'oCompany = conexiones.conectaDI(BaseDatos,Usuario, Password, baseDeDatos)
+        Dim oMot As Motivos = New Motivos
+        Dim listmot As List(Of Motivos) = New List(Of Motivos)
 
-        'conexiones.ConnectSQLServer(baseDeDatos)
+        Dim oImp As Impresoras = New Impresoras
+        Dim listimp As List(Of Impresoras) = New List(Of Impresoras)
+
         Dim oCompany As SAPbobsCOM.Company
         oCompany = New SAPbobsCOM.Company
         oCompany = conectaDI(BaseDatos, Usuario, Password)
-        EstablecerAlmacen(oCompany)
 
-        'Dim conexiones As EXO_DIAPI.EXO_DIAPI
-        'conexiones = New EXO_DIAPI.EXO_DIAPI(oCompany)
-        Dim rs As SAPbobsCOM.Recordset
-        rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
-
+        Dim rs As SAPbobsCOM.Recordset = Nothing
+        Dim rs2 As SAPbobsCOM.Recordset = Nothing
         Try
 
-            'hacer consulta al sql y y rellenar el listado
-            'CONSULTA EN HANA
-            Dim query As String = "SELECT ""USER_CODE"" FROM ""OUSR"" WHERE ""USER_CODE""='" + Usuario.Replace("'", "") + "' and ""U_EXO_PASS""='" + Password.Replace("'", "") + "' and LENGTH(""U_EXO_PASS"")>0 "
+            If oCompany.CompanyDB <> "" Then
+                If oCompany.Connected Then
+                    EstablecerAlmacen(oCompany)
 
-            'Dim query As String = "SELECT ""firstName"" FROM ""OHEM"" "
+                    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
-            'Dim tabla As DataTable = New System.Data.DataTable()
-            'tabla = conexiones.SQL.sqlComoDataTable(query)
+                    'hacer consulta al sql y y rellenar el listado
+                    'CONSULTA EN HANA
+                    Dim query As String = ""
+                    'Dim query As String = "SELECT ""USER_CODE"" FROM ""OUSR"" WHERE ""USER_CODE""='" + Usuario.Replace("'", "") + "' and ""U_EXO_PASS""='" + Password.Replace("'", "") + "' and LENGTH(""U_EXO_PASS"")>0 "
 
-            'If tabla.Rows.Count > 0 Then
+                    'rs.DoQuery(query)
+                    Dim tabla As DataTable = New System.Data.DataTable()
 
-            '    For Each fila As DataRow In tabla.Rows
+                    'If rs.RecordCount > 0 Then
 
-            '    Next
+                    jRes.Resultado = "Ok"
 
-            'End If
+                        'rellenamos impresoras
+                        For Each InstalledPrinters As String In System.Drawing.Printing.PrinterSettings.InstalledPrinters
+                            oImp = New Impresoras
+                            oImp.Nombre = InstalledPrinters
+                            listimp.Add(oImp)
+                        Next
 
-            'recorro y voy rellenando listado 
+                        jRes.Impresoras = listimp
 
+                        'rellenamos motivos
+                        rs2 = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                        query = "SELECT * from ""@PP_MOTAL"" "
 
+                        rs.DoQuery(query)
 
+                        If rs.RecordCount > 0 Then
+                            rs.MoveFirst()
+                            While (Not rs.EoF)
 
-            rs.DoQuery(query)
-            'Dim tabla As DataTable = New System.Data.DataTable()
+                                oMot = New Motivos
+                                oMot.Codigo = rs.Fields.Item("Code").Value.ToString
+                                oMot.Nombre = rs.Fields.Item("Name").Value.ToString
+                                oMot.Tipo = rs.Fields.Item("U_PP_TIPO").Value.ToString
+                                oMot.CC = rs.Fields.Item("U_PP_OACT").Value.ToString
+                                listmot.Add(oMot)
 
-            If rs.RecordCount > 0 Then
-                ''tabla = conexiones.SQL.sqlComoDataTable(query)
+                                rs.MoveNext()
+                            End While
+                        End If
 
-                'If tabla.Rows.Count > 0 Then
+                        jRes.Motivos = listmot
+                    Else
+                        jRes.Resultado = "Error: no conectado"
+                    End If
 
-                jRes.Resultado = "Ok"
-
+                'Else
+                'jRes.Resultado = "Error: Usuario o contraseña incorrectos"
+                'End If
             Else
-                jRes.Resultado = "Usuario o contraseña incorrectos"
+                jRes.Resultado = "Error: Usuario o contraseña incorrectos"
             End If
 
+
         Catch ex As Exception
-            log.escribeMensaje(ex.Message, EXO_Log.EXO_Log.Tipo.error)
+            log.escribeMensaje("Error: " + ex.Message, EXO_Log.EXO_Log.Tipo.error)
             jRes.Resultado = ex.Message
         Finally
             EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rs, Object))
+            EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rs2, Object))
             '   EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(oCompany, Object))
         End Try
 
@@ -611,17 +639,21 @@ Public Class Service1
                 query = query + " and ( UPPER(T0.""CardCode"") like '%" + NomProv.ToUpper() + "%' or UPPER(T0.""CardName"") like '%" + NomProv.ToUpper() + "%' or UPPER(T6.""CardFName"") like '%" + NomProv.ToUpper() + "%') "
             End If
 
-            If NumContenedor <> "" Then
-                query = query + " and T1.""U_EXO_CODEOCONTE"" = '" + NumContenedor + "' "
-            End If
+            'If NumContenedor <> "" Then
+            '    query = query + " and T1.""U_EXO_CODEOCONTE"" = '" + NumContenedor + "' "
+            'End If
 
-            If DescArt <> "" Then
-                query = query + " and UPPER(T2.""ItemCode"") like '%" + DescArt.ToUpper() + "%' "
-            End If
+            'If DescArt <> "" Then
+            '    query = query + " and UPPER(T2.""ItemCode"") like '%" + DescArt.ToUpper() + "%' "
+            'End If
 
             If CodEan <> "" Then
-                query = query + " and ((T2.""CodeBars"" = '" + CodEanConversion + "' ) OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') "
+                query = query + " and T0.""DocNum""='" + CodEan + "' "
             End If
+
+            'If CodEan <> "" Then
+            '    query = query + " and ((T2.""CodeBars"" = '" + CodEanConversion + "' ) OR COALESCE(T4.""BcdCode"",'')='" + CodEanConversion + "') "
+            'End If
 
             query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T6.""CardFName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
                      " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"",T0.""NumAtCard"" " +
@@ -854,7 +886,6 @@ Public Class Service1
         Dim rs As SAPbobsCOM.Recordset = Nothing
 
         Try
-
             'hacer consulta al sql y y rellenar el listado
 
             Dim query As String = " SELECT SUM(T0.""U_EXO_CANT"") as ""U_EXO_CANT"", COALESCE(T0.""U_EXO_LOTE"",'') AS ""U_EXO_LOTE"",T0.""U_EXO_UBICA"",T1.""CardName"",T4.""ItemCode"",T4.""ItemName"",T3.""UomCode"", " +
@@ -864,9 +895,6 @@ Public Class Service1
                          " INNER Join ""OITM"" T4 ON T3.""ItemCode""=T4.""ItemCode""  " +
                          " WHERE ""U_EXO_USUARIO"" ='" + Usuario + "'  " +
                          " Group by  T0.""U_EXO_CANT"", T0.""U_EXO_LOTE"", T0.""U_EXO_UBICA"", T1.""CardName"", T4.""ItemCode"", T4.""ItemName"", T3.""UomCode"",T0.""U_EXO_CANT"", T0.""U_PP_UOMO"",t0.""U_PP_QDES"",T0.""U_PP_UOMD"" "
-
-
-
 
             rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
@@ -2480,11 +2508,10 @@ Public Class Service1
                 Return res
             End If
 
-
             query = "SELECT ""AbsEntry"",""WhsCode"" FROM ""OBIN"" WHERE ""BinCode""='" + ListOp.UbicacionDestino + "'"
             rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
             rs.DoQuery(query)
-            log.escribeMensaje("traslado 4", EXO_Log.EXO_Log.Tipo.error)
+            'log.escribeMensaje("traslado 4", EXO_Log.EXO_Log.Tipo.error)
             If rs.RecordCount > 0 Then
                 rs.MoveFirst()
                 UbicacionDestino = rs.Fields.Item("AbsEntry").Value.ToString()
@@ -2497,7 +2524,6 @@ Public Class Service1
                 Return res
             End If
 
-
             oDoc = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oStockTransfer)
             oDoc.DocObjectCode = SAPbobsCOM.BoObjectTypes.oStockTransfer
 
@@ -2505,12 +2531,19 @@ Public Class Service1
             oDoc.ToWarehouse = AlmacenDestino
             oDoc.Comments = "Creado desde lectores planta"
 
+            If IsNothing(ListOp.Motivo) Then
+                oDoc.UserFields.Fields.Item("U_PP_MOTAL").Value = "67"
+            Else
+                If ListOp.Motivo <> "" Then
+                    oDoc.UserFields.Fields.Item("U_PP_MOTAL").Value = ListOp.Motivo
+                End If
+
+            End If
 
             If IsNothing(ListOp.NumeroPicking) Then
             Else
                 oDoc.UserFields.Fields.Item("U_EXO_NUMPIC").Value = ListOp.NumeroPicking
                 oDoc.UserFields.Fields.Item("U_EXO_LINPIC").Value = ListOp.PickingLinea
-
 
             End If
 
@@ -2555,7 +2588,7 @@ Public Class Service1
                     ' conexiones.ExecuteNonQuery("update pkl1 set u_exo_traslado='Y' where absentry='" + ListOp.NumeroPicking + "' and pickentry='" + ListOp.PickingLinea + "'")
                 End If
             Else
-                log.escribeMensaje("traslado 9", EXO_Log.EXO_Log.Tipo.error)
+                'log.escribeMensaje("traslado 9", EXO_Log.EXO_Log.Tipo.error)
 
                 jRes.Resultado = oCompany.GetLastErrorDescription
             End If
@@ -3600,8 +3633,8 @@ Public Class Service1
 
                 almacen = rs.Fields.Item("WhsCode").Value.ToString()
             Else
-                'log.escribeMensaje(ex.Message, EXO_Log.EXO_Log.Tipo.error)
-                oPed.Resultado = "Error: La ubicacion destino no existe " + Ubicacion
+                log.escribeMensaje("comprueba articulo salida " + Ubicacion, EXO_Log.EXO_Log.Tipo.error)
+                oPed.Resultado = "Error: La ubicacion origen no existe " + Ubicacion
                 listado.Add(oPed)
                 res = js.Serialize(listado)
 
@@ -3702,6 +3735,14 @@ Public Class Service1
                 oDoc = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.oInventoryGenExit)
             End If
 
+            If IsNothing(ListOp.Motivo) Then
+
+            Else
+                If ListOp.Motivo <> "" Then
+                    oDoc.UserFields.Fields.Item("U_PP_MOTAL").Value = ListOp.Motivo
+                End If
+
+            End If
 
             Dim esPrimeraLinea As Boolean = True
 
@@ -3716,7 +3757,20 @@ Public Class Service1
                 oDoc.Lines.Quantity = Linea.Cantidad
                 oDoc.Lines.ItemCode = Linea.Articulo
 
-                log.escribeMensaje(AlmacenPrincipal, EXO_Log.EXO_Log.Tipo.informacion)
+                If Linea.PrecioProducto > 0 Then
+                    oDoc.Lines.UnitPrice = Linea.PrecioProducto
+                End If
+
+                If IsNothing(ListOp.CC) Then
+
+                Else
+                    If ListOp.CC <> "" Then
+                        oDoc.Lines.AccountCode = ListOp.CC
+                    End If
+
+                End If
+
+                'log.escribeMensaje(AlmacenPrincipal, EXO_Log.EXO_Log.Tipo.informacion)
                 'Con este comando activamos si queremos usar la unidad de inventario o la del articulo
                 'si es la del articulo hay que poner en la ubicacion y en los lotes la cantidad total, buscar en el articulo la conversión. NumInBuy or NumInSale
                 'oDoc.Lines.UseBaseUnits = BoYesNoEnum.tNO
@@ -4443,6 +4497,9 @@ Public Class Service1
 
                 If rs.RecordCount > 0 Then
                     rs.MoveFirst()
+
+
+                    oTransfer.UserFields.Fields.Item("U_PP_MOTAL").Value = "67"
 
                     oTransfer.FromWarehouse = sAlmacen
                     oTransfer.ToWarehouse = rs.Fields.Item("ToWhsCode").Value.ToString

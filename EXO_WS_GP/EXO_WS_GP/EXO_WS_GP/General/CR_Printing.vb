@@ -15,7 +15,7 @@ Namespace SAP.ImpresionEtiquetas
             Dim File As String = ""
             Dim eDriver As String = "{B1CRHPROXY}"
             Dim Cripto As New EXO_DIAPI.EXO_Cripto()
-            Dim rs As SAPbobsCOM.Recordset
+            Dim rs As SAPbobsCOM.Recordset = Nothing
 
             'Dim usuarioHANA As String = System.Configuration.ConfigurationManager.AppSettings("usuarioHANA")
             'Dim pwdHANA As String = System.Configuration.ConfigurationManager.AppSettings("pwdHANA")
@@ -87,6 +87,7 @@ Namespace SAP.ImpresionEtiquetas
                         'ObjGlobal.SBOApp.StatusBar.SetText("Salvando a disco el PDF:" & Name, SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Warning)
                         'oCRReport.SaveAs("D:\EO\CR.rpt")
                         oCRReport.ExportToDisk(ExportFormatType.PortableDocFormat, Name)
+
                         Return Name
                     Else
                         'ObjGlobal.SBOApp.StatusBar.SetText("Imprimiendo:" & Name, SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Warning)

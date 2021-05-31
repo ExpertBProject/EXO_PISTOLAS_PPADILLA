@@ -176,6 +176,37 @@ End Class
 
 <DataContract()>
 <Serializable()>
+Public Class Login
+    <DataMember()>
+    Public Resultado As String
+    <DataMember()>
+    Public Impresoras As List(Of Impresoras)
+    <DataMember()>
+    Public Motivos As List(Of Motivos)
+End Class
+
+<DataContract()>
+<Serializable()>
+Public Class Impresoras
+    <DataMember()>
+    Public Nombre As String
+End Class
+
+<DataContract()>
+<Serializable()>
+Public Class Motivos
+    <DataMember()>
+    Public Codigo As String
+    <DataMember()>
+    Public Nombre As String
+    <DataMember()>
+    Public Tipo As String
+    <DataMember()>
+    Public CC As String
+End Class
+
+<DataContract()>
+<Serializable()>
 Public Class BasesDatos
     <DataMember()>
     Public Resultado As String
@@ -430,6 +461,10 @@ Public Class Traslado
     Public NumeroPicking As String
     <DataMember()>
     Public PickingLinea As String
+    <DataMember()>
+    Public Motivo As String
+    <DataMember()>
+    Public CC As String
 End Class
 
 <DataContract()>
@@ -515,6 +550,10 @@ Public Class OperacionEntradaSalida
     <DataMember()>
     Public Resultado As String
     <DataMember()>
+    Public Motivo As String
+    <DataMember()>
+    Public CC As String
+    <DataMember()>
     Public Lineas As List(Of Articulo)
 End Class
 
@@ -547,7 +586,8 @@ Public Class Articulo
     Public Ubicacion As String
     <DataMember()>
     Public CantidadUDM As Double
-
+    <DataMember()>
+    Public PrecioProducto As Double
 End Class
 
 <DataContract()>
