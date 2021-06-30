@@ -460,12 +460,12 @@ Public Class Form1
         oPicking.Resultado = ""
 
         oLinea = New WS_GP.LotesImprimir
-        oLinea.TipoEtiqueta = 0
-        oLinea.Lote = "21000015-001-007-01-A000005-210527"
+        oLinea.TipoEtiqueta = 1
+        oLinea.Lote = "21000019-001-020-01-A000018-210602"
         oLinea.CodArticulo = "MHB0RCZZZZZZZ"
-        oLinea.SysNumber = "477"
-        oLinea.Ubicacion = "350,PL"
-        oLinea.Impresora = "HP LaserJet 1020 (redirected 23)"
+        oLinea.SysNumber = 613
+        oLinea.Ubicacion = "350,04,00,00,14"
+        oLinea.Impresora = "Microsoft Print to PDF"
         oLineas.Add(oLinea)
 
         oPicking.LotesImprimir = oLineas.ToArray

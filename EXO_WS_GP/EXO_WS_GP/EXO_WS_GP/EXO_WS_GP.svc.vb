@@ -306,13 +306,7 @@ Public Class Service1
             If conexionesB1.Contains(ValorUsuarioBase) Then
                 oComp = CType(conexionesB1(ValorUsuarioBase), SAPbobsCOM.Company)
                 Try
-                    If oComp.Password = Password Then
 
-                    Else
-                        log.escribeMensaje("error conectando " + Usuario + ": contraseña incorrecta")
-                        conexionesB1.Remove(ValorUsuarioBase)
-                        oComp.Disconnect()
-                    End If
                 Catch ex As Exception
 
                     conexionesB1.Remove(ValorUsuarioBase)
@@ -336,6 +330,7 @@ Public Class Service1
                 oComp.UserName = Usuario
                 oComp.Password = Password
                 oComp.Server = servidorSBO
+                oComp.language = BoSuppLangs.ln_Spanish
                 'oComp.LicenseServer = servidorLicencias
                 'oComp.DbUserName = usuarioHANA
                 'oComp.DbPassword = pwdHANA
@@ -963,6 +958,7 @@ Public Class Service1
         Dim rsLin As SAPbobsCOM.Recordset = Nothing
         Dim rsPorte As SAPbobsCOM.Recordset = Nothing
         Dim rscONS As SAPbobsCOM.Recordset = Nothing
+        Dim rsUbi As SAPbobsCOM.Recordset = Nothing
 
         Dim oCompany As SAPbobsCOM.Company
         oCompany = New SAPbobsCOM.Company
@@ -1128,13 +1124,17 @@ Public Class Service1
                     Dim UbiActual As String = ""
 
                     'MINI BUCLE PARA LAS LINEAS
-                    query = "SELECT SUM(T0.""U_EXO_CANT"") as ""U_EXO_CANT"",T0.""U_EXO_LOTE"",T2.""AbsEntry"", SUM(T0.""U_EXO_CANT"") as ""TotalBin"",  " +
+
+                    'cambio el u_exo_ubica de exo_gp_pedcom, por la ubicacion playa del almacen de la linea
+
+                    query = "SELECT SUM(T0.""U_EXO_CANT"") as ""U_EXO_CANT"",T0.""U_EXO_LOTE"", " +
+                        " MIN(T2.""AbsEntry"") ""AbsEntry"", SUM(T0.""U_EXO_CANT"") as ""TotalBin"",  " +
                         " T4.""BHeight1"",T4.""BWidth1"",T4.""BLength1"",T4.""BWeight1"", T4.""BVolume"" , " +
                     " T0.""U_PP_UOMO"",t0.""U_PP_QDES"",T0.""U_PP_SCOF"",T0.""U_PP_UOMD"",T0.""U_PP_ORIG"",T0.""U_PP_RATIO"",T3.""WhsCode"" " +
                     " FROM ""@EXO_GP_PEDCOM"" T0 INNER JOIN ""OPOR"" T1 On T0.""U_EXO_DOCE""=T1.""DocEntry"" " +
-                    " INNER JOIN ""OBIN"" T2 On T0.""U_EXO_UBICA""=T2.""BinCode"" " +
                     " INNER JOIN ""POR1"" T3 On T0.""U_EXO_DOCE""=T3.""DocEntry"" And COALESCE(T0.""U_EXO_LINENUM"",0)=T3.""LineNum"" " +
-                    " INNER JOIN ""OITM"" T4 ON T3.""ItemCode""=T4.""ItemCode"" " +
+                    "  INNER JOIN ""OBIN"" T2 ON T3.""WhsCode""=T2.""WhsCode"" and T2.""U_EXO_ESPLAYA""='Y' " +
+                    " INNER JOIN ""OITM"" T4 On T3.""ItemCode""=T4.""ItemCode"" " +
                     " WHERE ""U_EXO_USUARIO""='" + Usuario + "' and  T0.""U_EXO_DOCE""='" + rs.Fields.Item("U_EXO_DOCE").Value.ToString() + "' and COALESCE(T0.""U_EXO_LINENUM"",0)='" + rs.Fields.Item("U_EXO_LINENUM").Value.ToString() + "' " +
                     " group by T2.""AbsEntry"" ,T0.""U_EXO_LOTE"", T4.""BHeight1"",T4.""BWidth1"",T4.""BLength1"",T4.""BWeight1"", T4.""BVolume"",T0.""U_PP_UOMO"",t0.""U_PP_QDES"",T0.""U_PP_SCOF"",T0.""U_PP_UOMD"",T0.""U_PP_ORIG"",T0.""U_PP_RATIO"",T0.""U_EXO_LINENUM"",T3.""WhsCode"" " +
                     " ORDER BY T0.""U_EXO_LINENUM"" ASC"
@@ -1152,6 +1152,8 @@ Public Class Service1
                         oDoc.Lines.BaseType = 22
 
                         oDoc.Lines.WarehouseCode = rsLin.Fields.Item("WhsCode").Value.ToString()
+
+                        'buscar la ubicacion playa.
 
                         cantidadTotal = cantidadTotal + CType(rsLin.Fields.Item("U_EXO_CANT").Value, Double)
 
@@ -1173,6 +1175,7 @@ Public Class Service1
                             oDoc.Lines.BatchNumbers.BatchNumber = rsLin.Fields.Item("U_EXO_LOTE").Value.ToString()
                             oDoc.Lines.BatchNumbers.Quantity = CType(rsLin.Fields.Item("TotalBin").Value.ToString(), Double)
 
+                            oDoc.Lines.BatchNumbers.ManufacturerSerialNumber = clienteActual
                             oDoc.Lines.BatchNumbers.UserFields.Fields.Item("U_PP_QDES").Value = CType(rsLin.Fields.Item("U_PP_QDES").Value.ToString(), Double)
                             oDoc.Lines.BatchNumbers.UserFields.Fields.Item("U_PP_SCOF").Value = rsLin.Fields.Item("U_PP_SCOF").Value.ToString()
                             oDoc.Lines.BatchNumbers.UserFields.Fields.Item("U_PP_UOMO").Value = rsLin.Fields.Item("U_PP_UOMO").Value.ToString()
@@ -1335,6 +1338,8 @@ Public Class Service1
             EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rsLin, Object))
             EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rsPorte, Object))
             EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rscONS, Object))
+
+            EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(rsUbi, Object))
 
             ' EXO_CleanCOM.CLiberaCOM.liberaCOM(CType(oDoc, Object))
         End Try
@@ -1592,7 +1597,7 @@ Public Class Service1
                 'COMPRUEBO PEDIDOS
                 If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
                     'comprobar que no hay mas pedidos o mas lineas abiertas
-                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OWTQ"" T0 INNER JOIN ""WTQ"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
+                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OWTQ"" T0 INNER JOIN ""WTQ1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
                             "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
 
                     rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
@@ -1915,8 +1920,8 @@ Public Class Service1
                         " T4.""BHeight1"",T4.""BWidth1"",T4.""BLength1"",T4.""BWeight1"", T4.""BVolume"" , " +
                     " T3.""WhsCode"",t1.""Filler"" " +
                     " FROM ""@EXO_GP_TRACOM"" T0 INNER JOIN ""OWTQ"" T1 On T0.""U_EXO_DOCE""=T1.""DocEntry"" " +
-                    " INNER JOIN ""OBIN"" T2 On T0.""U_EXO_UBICA""=T2.""BinCode"" " +
                     " INNER JOIN ""WTQ1"" T3 On T0.""U_EXO_DOCE""=T3.""DocEntry"" And COALESCE(T0.""U_EXO_LINENUM"",0)=T3.""LineNum"" " +
+                    "  INNER JOIN ""OBIN"" T2 ON T1.""ToWhsCode""=T2.""WhsCode"" and T2.""U_EXO_ESPLAYA""='Y' " +
                     " INNER JOIN ""OITM"" T4 ON T3.""ItemCode""=T4.""ItemCode"" " +
                     " WHERE ""U_EXO_USUARIO""='" + Usuario + "' and  T0.""U_EXO_DOCE""='" + rs.Fields.Item("U_EXO_DOCE").Value.ToString() + "' and COALESCE(T0.""U_EXO_LINENUM"",0)='" + rs.Fields.Item("U_EXO_LINENUM").Value.ToString() + "' " +
                     " group by T2.""AbsEntry"" ,T0.""U_EXO_LOTE"", T4.""BHeight1"",T4.""BWidth1"",T4.""BLength1"",T4.""BWeight1"", " +
@@ -3720,6 +3725,8 @@ Public Class Service1
         ListOp = js.Deserialize(Of OperacionEntradaSalida)(JSON)
         Dim sdocnum As String = ""
 
+        'log.escribeMensaje("entradaSalida " + JSON)
+
         Dim oCompany As SAPbobsCOM.Company
         oCompany = New SAPbobsCOM.Company
         oCompany = conectaDI(BaseDatos, Usuario, Password)
@@ -4096,6 +4103,8 @@ Public Class Service1
                     If oICL.BinEntry = Linea.CodUbicacion And oICL.ItemCode = Linea.Articulo Then
                         oICL.Counted = BoYesNoEnum.tYES
                         oICL.CountedQuantity = Linea.CantidadContada
+
+
                     End If
 
                 Next
@@ -4654,13 +4663,22 @@ Public Class Service1
                         End If
 
                         'oSolFin.DocumentReferences.Add()
-                        oSolFin.DocumentReferences.ReferencedDocEntry = DocEntry
-                        oSolFin.DocumentReferences.ReferencedObjectType = ReferencedObjectTypeEnum.rot_InventoryTransfer
-                        oSolFin.DocumentReferences.Remark = "Traslado intermedio"
+                        'oSolFin.DocumentReferences.ReferencedDocEntry = DocEntry
+                        'oSolFin.DocumentReferences.ReferencedObjectType = ReferencedObjectTypeEnum.rot_InventoryTransfer
+                        'oSolFin.DocumentReferences.Remark = "Traslado intermedio"
                         'generamos la solicitud de trasaldo del almacen final
-
+                        log.escribeMensaje("antes de generar traslado intermedio")
                         If oSolFin.Add() <> 0 Then
-                            Dim error25 As String = oCompany.GetLastErrorDescription
+                            log.escribeMensaje("generar traslado intermedio:" + oCompany.GetLastErrorDescription)
+                            'Dim error25 As String = oCompany.GetLastErrorDescription
+                            jRes.Resultado = oCompany.GetLastErrorDescription
+                            log.escribeMensaje(oCompany.GetLastErrorDescription, EXO_Log.EXO_Log.Tipo.informacion)
+                            'If oCompany.InTransaction = True Then
+                            '    oCompany.EndTransaction(BoWfTransOpt.wf_RollBack)
+                            'End If
+
+                            res = js.Serialize(jRes)
+                            Return res
                         End If
 
                     Else
@@ -4874,8 +4892,8 @@ Public Class Service1
 
                     oPic.Resultado = "Ok"
                     oPic.Codigo = rs.Fields.Item("BinCode").Value
-                    oPic.PesoMaximo = rs.Fields.Item("PesoArticulo").Value
-                    oPic.PesoUbicacion = rs.Fields.Item("MaxWeight1").Value
+                    oPic.PesoMaximo = rs.Fields.Item("MaxWeight1").Value
+                    oPic.PesoUbicacion = rs.Fields.Item("PesoArticulo").Value
 
                     ListPic.Add(oPic)
                     rs.MoveNext()
@@ -5264,7 +5282,7 @@ Public Class Service1
                 olist.LotesImprimir = listLot
 
             Else
-                olist.Resultado = "Error: no hay registros coincidentes."
+                olist.Resultado = "Error: etiquetas no configuradas."
             End If
 
         Catch ex As Exception
@@ -5286,7 +5304,10 @@ Public Class Service1
 
         Dim ListOp As ListaLotesImprimir = New ListaLotesImprimir
         Dim js As New JavaScriptSerializer()
+
+        LOG.escribeMensaje("JSON " + JSON)
         ListOp = js.Deserialize(Of ListaLotesImprimir)(JSON)
+        LOG.escribeMensaje("DESPUES DE DESERIALIZE")
         Dim USERID As String = ""
 
         Dim oCompany As SAPbobsCOM.Company

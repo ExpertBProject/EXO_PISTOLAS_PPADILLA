@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION EXO_GP_Gestionar_En_Pick
 (
- 	IN pClavePicking int,
-    IN pLineaPicking int,
+ 	IN pClavePicking INT,
+    IN pLineaPicking INT,
 	IN pCantAGestionar DECIMAL(19,6),
 	IN pLoteAsignado nvarchar(36)
 
@@ -15,7 +15,7 @@ BEGIN
 
  IF :pLoteAsignado != '' THEN
  
- 	SELECT  SUM(T1."Quantity") INTO vCantEnBahia FROM "OWTR" T0
+ 	SELECT  SUM(T1."Quantity") INTO vCantEnBahia FROM "OWTR" T0A
 	INNER JOIN "WTR1" T1 ON T0."DocEntry" = T1."DocEntry"
 	INNER JOIN "IBT1" T2 ON T2."BaseType" = T0."ObjType" AND T2."BaseEntry" = T1."DocEntry" 
 	WHERE T0."U_EXO_NUMPIC" = :pClavePicking AND T0."U_EXO_LINPIC" = :pLineaPicking AND T2."BatchNum" = :pLoteAsignado;    
