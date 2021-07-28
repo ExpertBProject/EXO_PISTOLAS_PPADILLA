@@ -96,8 +96,8 @@ Public Class Form1
         Dim cliente As WS_GP.EXO_WS_GPClient = New WS_GP.EXO_WS_GPClient
         Dim respuestas As String = ""
 
-        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "", "", "21000016", "")
-        'respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "ESPA", "", "", "")
+        'respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "manager", "Exp3rt0n3$", "", "", "21000016", "")
+        respuestas = cliente.RecepcionMaterialesBuscador("PD_PPADILLA", "mperiz", "M@rt1nN1c0", "", "", "", "")
         MessageBox.Show(respuestas)
     End Sub
 

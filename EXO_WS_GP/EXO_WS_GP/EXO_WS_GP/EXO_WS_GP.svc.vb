@@ -265,9 +265,6 @@ Public Class Service1
         Return a
     End Function
 
-
-
-
 #End Region
 
 #Region "Conectar y Loguin"
@@ -336,7 +333,7 @@ Public Class Service1
                 'oComp.DbPassword = pwdHANA
 
                 ' log.escribeMensaje("datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA)
-
+                Dim ALGO2 As String = "datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA
                 If oComp.Connect() <> 0 Then
                     Dim algo As String = oComp.GetLastErrorDescription()
                     log.escribeMensaje("error conectando: " + algo)
@@ -619,7 +616,7 @@ Public Class Service1
             Dim query As String = " SELECT * FROM ( SELECT T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T6.""CardFName"",T1.""ItemCode"",T2.""ItemName"",max(T1.""OpenQty"")- sum(COALESCE(T3.""U_EXO_CANT"",0)) as ""OpenQty"",  " +
                                 " Case WHEN COALESCE(T2.""ManBtchNum"",'N') = 'N' THEN 'N' ELSE 'Y' END as ""EsLote"", " +
                                 " T2.""BHeight1"" As ""Alto"", T2.""BWidth1"" As ""Ancho"",T2.""BLength1"" As ""Largo"",T2.""BWeight1"" As ""Peso"",T1.""unitMsr"",t1.""UomCode"" ""UDM_PEDIDO"",T5.""UomCode"" ""UDM_INV"" " +
-                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"",T0.""NumAtCard"" " +
+                                " , COALESCE(T2.""CodeBars"",T4.""BcdCode"") as ""EAN"",T0.""NumAtCard"",T1.""WhsCode"" " +
                                 " FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 ON T0.""DocEntry""=T1.""DocEntry"" " +
                                 " INNER Join ""OITM"" T2 ON T1.""ItemCode""=T2.""ItemCode"" " +
                                 " LEFT JOIN ""@EXO_GP_PEDCOM"" T3 ON T1.""DocEntry""=T3.""U_EXO_DOCE"" and T1.""LineNum""=T3.""U_EXO_LINENUM"" " +
@@ -651,7 +648,7 @@ Public Class Service1
             'End If
 
             query = query + " group by T0.""DocEntry"", T0.""DocNum"",T1.""LineNum"",T0.""CardCode"",T0.""CardName"",T6.""CardFName"",T1.""ItemCode"",T2.""ItemName"",T2.""ManBtchNum"", " +
-                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"",T0.""NumAtCard"" " +
+                     " T2.""BHeight1"", T2.""BWidth1"",T2.""BLength1"",T2.""BWeight1"",T1.""unitMsr"" ,T4.""BcdCode"" ,T1.""UomCode"",T5.""UomCode"",T2.""CodeBars"",T0.""NumAtCard"",T1.""WhsCode"" " +
                      " ORDER BY T0.""DocEntry"", T1.""LineNum"" " +
                     " ) as A0 " +
                     " WHERE A0.""OpenQty"" > 0 "
@@ -686,6 +683,7 @@ Public Class Service1
                     oPed.UdmLinea = rs.Fields.Item("UDM_PEDIDO").Value.ToString
                     oPed.EAN = rs.Fields.Item("EAN").Value.ToString
                     oPed.ReferenciaPedido = rs.Fields.Item("NumAtCard").Value.ToString
+                    oPed.Almacen = rs.Fields.Item("WhsCode").Value.ToString
 
                     query2 = "SELECT T0.""U_PP_SCOF"" ""Coeficiente"" FROM OITM T0 WHERE T0.""ItemCode""='" & rs.Fields.Item("ItemCode").Value.ToString & "' AND T0.""U_PP_SCOF""='Y'
                         UNION ALL
@@ -779,27 +777,27 @@ Public Class Service1
             For Each ListOp As PedidoCompraRegistrarLinea In ListCRL.Lineas
 
                 'COMPRUEBO PEDIDOS
-                If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
-                    'comprobar que no hay mas pedidos o mas lineas abiertas
-                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
-                            "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
+                'If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
+                '    'comprobar que no hay mas pedidos o mas lineas abiertas
+                '    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
+                '            "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
 
-                    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                '    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
-                    rs.DoQuery(query)
+                '    rs.DoQuery(query)
 
-                    If rs.RecordCount > 0 Then
+                '    If rs.RecordCount > 0 Then
 
-                        rs.MoveFirst()
+                '        rs.MoveFirst()
 
-                        If rs.Fields.Item("TotalPedidos").Value > 1 Then
+                '        If rs.Fields.Item("TotalPedidos").Value > 1 Then
 
-                            jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
-                            res = js.Serialize(jRes)
-                            Return res
-                        End If
-                    End If
-                End If
+                '            jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
+                '            res = js.Serialize(jRes)
+                '            Return res
+                '        End If
+                '    End If
+                'End If
 
                 'INSERTO TABLA TEMPORAL
                 query = "SELECT MAX(""Code"")+1 AS ""Code"" FROM ""@EXO_GP_PEDCOM"" "
@@ -1595,27 +1593,27 @@ Public Class Service1
             For Each ListOp As PedidoCompraRegistrarLinea In ListCRL.Lineas
 
                 'COMPRUEBO PEDIDOS
-                If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
-                    'comprobar que no hay mas pedidos o mas lineas abiertas
-                    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OWTQ"" T0 INNER JOIN ""WTQ1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
-                            "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
+                'If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
+                '    'comprobar que no hay mas pedidos o mas lineas abiertas
+                '    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OWTQ"" T0 INNER JOIN ""WTQ1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
+                '            "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
 
-                    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+                '    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
-                    rs.DoQuery(query)
+                '    rs.DoQuery(query)
 
-                    If rs.RecordCount > 0 Then
+                '    If rs.RecordCount > 0 Then
 
-                        rs.MoveFirst()
+                '        rs.MoveFirst()
 
-                        If rs.Fields.Item("TotalPedidos").Value > 1 Then
+                '        If rs.Fields.Item("TotalPedidos").Value > 1 Then
 
-                            jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
-                            res = js.Serialize(jRes)
-                            Return res
-                        End If
-                    End If
-                End If
+                '            jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
+                '            res = js.Serialize(jRes)
+                '            Return res
+                '        End If
+                '    End If
+                'End If
 
                 'ToDo -> TENDRÍA QUE RECIBIR EL NUMERO DE SOLICITUD DE TRASLADO PARA COMPROBAR QUE EXISTE LA UBICACION EN EL ALMACEN ORIGEN
                 'ToDo -> O TENDRÍA QUE ASIGNARLE YO LA UBICACION ORIGEN EN CASO DE QUE FUERA UNICA.
@@ -5757,27 +5755,27 @@ Public Class Service1
             Dim rs As SAPbobsCOM.Recordset
 
             'COMPRUEBO PEDIDOS
-            If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
-                'comprobar que no hay mas pedidos o mas lineas abiertas
-                query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
-                        "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
+            'If ListOp.CantidadSeleccionada > ListOp.CantidadReal Then
+            '    'comprobar que no hay mas pedidos o mas lineas abiertas
+            '    query = "SELECT COUNT(CONCAT(T1.""DocEntry"",T1.""LineNum"")) AS ""TotalPedidos"" FROM ""OPOR"" T0 INNER JOIN ""POR1"" T1 On T0.""DocEntry""=T1.""DocEntry"" " +
+            '            "WHERE T1.""ItemCode"" = '" + ListOp.Codigo + "' and T0.""CardCode""='" + ListOp.Proveedor + "' and T1.""LineStatus""='O'"
 
-                rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
+            '    rs = oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset)
 
-                rs.DoQuery(query)
+            '    rs.DoQuery(query)
 
-                If rs.RecordCount > 0 Then
+            '    If rs.RecordCount > 0 Then
 
-                    rs.MoveFirst()
+            '        rs.MoveFirst()
 
-                    If rs.Fields.Item("TotalPedidos").Value > 1 Then
+            '        If rs.Fields.Item("TotalPedidos").Value > 1 Then
 
-                        jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
-                        res = js.Serialize(jRes)
-                        Return res
-                    End If
-                End If
-            End If
+            '            jRes.Resultado = "Hay mas lineas abiertas de este artículo. Imposible superar la cantidad permitida."
+            '            res = js.Serialize(jRes)
+            '            Return res
+            '        End If
+            '    End If
+            'End If
 
             'ACTUALIZO DATOS ARTICULO
             query = "select CASE WHEN  COALESCE(""BHeight1"",0)=0 OR  COALESCE(""BWidth1"",0)=0 OR COALESCE(""BLength1"",0)=0 OR COALESCE(""BWeight1"",0)=0 THEN 'Y' ELSE 'N' END AS ""Actualizar"",""UgpEntry"" " +

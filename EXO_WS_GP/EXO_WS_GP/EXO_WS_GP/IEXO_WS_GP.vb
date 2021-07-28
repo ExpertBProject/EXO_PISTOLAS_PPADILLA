@@ -299,6 +299,8 @@ Public Class PedidosCompra
     Public EAN As String
     <DataMember()>
     Public ReferenciaPedido As String
+    <DataMember()>
+    Public Almacen As String
 End Class
 
 <DataContract()>
