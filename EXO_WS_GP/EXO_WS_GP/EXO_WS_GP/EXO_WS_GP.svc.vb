@@ -321,19 +321,22 @@ Public Class Service1
 
                 oComp.DbServerType = SAPbobsCOM.BoDataServerTypes.dst_HANADB
                 oComp.UseTrusted = False
+                oComp.Server = servidorSBO
+                oComp.LicenseServer = servidorLicencias
                 oComp.CompanyDB = BaseDatos
                 'oComp.UserName = usuarioSBO
                 'oComp.Password = pwdSBO
                 oComp.UserName = Usuario
                 oComp.Password = Password
-                oComp.Server = servidorSBO
+
                 oComp.language = BoSuppLangs.ln_Spanish
-                'oComp.LicenseServer = servidorLicencias
+
                 'oComp.DbUserName = usuarioHANA
                 'oComp.DbPassword = pwdHANA
 
-                ' log.escribeMensaje("datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA)
-                Dim ALGO2 As String = "datos conexion" + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA
+                'log.escribeMensaje("datos conexion " + servidorSBO + " " + servidorLicencias + " " + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA)
+                'Dim ALGO2 As String = "datos conexion" + servidorSBO + BaseDatos + " " + Usuario + " " + Password + " " + usuarioHANA + " " + pwdHANA
+
                 If oComp.Connect() <> 0 Then
                     Dim algo As String = oComp.GetLastErrorDescription()
                     log.escribeMensaje("error conectando: " + algo)
